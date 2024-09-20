@@ -15,12 +15,11 @@ function isMobile() {
 connectButton.addEventListener("click", async () => {
   if (isMobile()) {
     // Мобильный deeplink для Phantom Wallet
-    const appName = "telegram-mini-app"; // Название вашего приложения
     const redirectUri = encodeURIComponent(
       "https://dblgq.github.io/testfront/"
     ); // Ваш redirect URI
-    const deepLinkPath = "/index.html"; // Указываем путь, куда вернется пользователь после авторизации
-    const deeplink = `https://phantom.app/ul/v1/connect?app=${appName}&deep_link_path=${deepLinkPath}&redirect_uri=${redirectUri}`;
+    const cluster = "mainnet-beta"; // Опционально: mainnet-beta, testnet или devnet
+    const deeplink = `https://phantom.app/ul/v1/connect?redirect_link=${redirectUri}&cluster=${cluster}`;
 
     console.log("Redirecting to Phantom via deeplink:", deeplink);
     window.location.href = deeplink; // Перенаправление на deeplink Phantom Wallet
