@@ -15,7 +15,7 @@ connectButton.addEventListener("click", async () => {
   if (isMobile()) {
     // Мобильный deeplink для Phantom Wallet
     const appName = "telegram-mini-app"; // Замените на название вашего приложения
-    const redirectUri = encodeURIComponent("https://your-app.com/"); // Замените на ваш redirect URI
+    const redirectUri = encodeURIComponent("https://dblgq.github.io/testfront/"); // Замените на ваш redirect URI
     const deeplink = `https://phantom.app/ul/v1?app=${appName}&redirect_uri=${redirectUri}`;
     window.location.href = deeplink;
   } else {
