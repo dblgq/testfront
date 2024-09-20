@@ -1,4 +1,4 @@
-// Подключение к Phantom Wallet
+// Элементы на странице
 const connectButton = document.getElementById("connect-wallet");
 const payButton = document.getElementById("pay-with-wallet");
 const walletInfo = document.getElementById("wallet-info");
@@ -11,13 +11,19 @@ function isMobile() {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 }
 
+// Функция для подключения к Phantom Wallet
 connectButton.addEventListener("click", async () => {
   if (isMobile()) {
     // Мобильный deeplink для Phantom Wallet
-    const appName = "telegram-mini-app"; // Замените на название вашего приложения
-    const redirectUri = encodeURIComponent("https://dblgq.github.io/testfront/"); // Замените на ваш redirect URI
-    const deeplink = `https://phantom.app/ul/v1?app=${appName}&redirect_uri=${redirectUri}`;
-    window.location.href = deeplink;
+    const appName = "telegram-mini-app"; // Название вашего приложения
+    const redirectUri = encodeURIComponent(
+      "https://dblgq.github.io/testfront/"
+    ); // Ваш redirect URI
+    const deepLinkPath = "/?phantom=true"; // Указываем путь, куда вернется пользователь
+    const deeplink = `https://phantom.app/ul/v1?app=${appName}&deep_link_path=${deepLinkPath}&redirect_uri=${redirectUri}`;
+
+    console.log("Redirecting to Phantom via deeplink:", deeplink);
+    window.location.href = deeplink; // Перенаправление на deeplink Phantom Wallet
   } else {
     // Десктопная версия
     if (window.solana && window.solana.isPhantom) {
@@ -43,37 +49,42 @@ connectButton.addEventListener("click", async () => {
   }
 });
 
-// Обработка авторизации через redirect_uri на мобильных устройствах
+// Обработка возвращения на сайт после подключения через Phantom Wallet
 window.addEventListener("load", () => {
   const params = new URLSearchParams(window.location.search);
-  const pubKey = params.get("public_key");
+  const pubKey = params.get("public_key"); // Получаем публичный ключ из URL
+
   if (pubKey) {
+    console.log("Public key received:", pubKey);
     publicKey = pubKey;
     walletInfo.style.display = "block";
     publicKeyDisplay.textContent = publicKey;
 
-    // Сохранение публичного ключа в localStorage
+    // Сохранение публичного ключа для последующего использования
     localStorage.setItem("publicKey", publicKey);
   } else {
-    // Проверка, есть ли сохраненный публичный ключ
+    console.log("No public key found in URL.");
+
+    // Проверяем, есть ли сохраненный публичный ключ в localStorage
     const savedPublicKey = localStorage.getItem("publicKey");
     if (savedPublicKey) {
       publicKey = savedPublicKey;
       walletInfo.style.display = "block";
       publicKeyDisplay.textContent = publicKey;
+      console.log("Loaded public key from localStorage:", savedPublicKey);
     }
   }
 });
 
+// Пример обработки платежа
 payButton.addEventListener("click", async () => {
   if (!publicKey) {
     alert("Please connect your Phantom Wallet first!");
     return;
   }
 
-  // Пример платежа
   try {
-    const recipientPublicKey = "EnterRecipientPublicKeyHere"; // Замените на публичный ключ получателя
+    const recipientPublicKey = "EnterRecipientPublicKeyHere"; // Укажите публичный ключ получателя
     const transaction = new solanaWeb3.Transaction().add(
       solanaWeb3.SystemProgram.transfer({
         fromPubkey: new solanaWeb3.PublicKey(publicKey),
@@ -82,41 +93,20 @@ payButton.addEventListener("click", async () => {
       })
     );
 
-    if (isMobile()) {
-      // Для мобильных устройств можно использовать deeplink для отправки транзакции
-      // Здесь упрощенный пример
-      const signedTransaction = await window.solana.signTransaction(
-        transaction
-      );
-      const signature = await window.solana.sendTransaction(
-        signedTransaction,
-        solanaWeb3.clusterApiUrl("mainnet-beta")
-      );
+    // Подпись и отправка транзакции
+    const { signature } = await window.solana.signAndSendTransaction(
+      transaction
+    );
+    console.log("Transaction signature:", signature);
 
-      // Отправка запроса на backend для подтверждения
-      await fetch("/confirm-transaction", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionSignature: signature }),
-      });
+    // Отправка запроса на backend для подтверждения (если нужно)
+    await fetch("/confirm-transaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transactionSignature: signature }),
+    });
 
-      alert("Payment successful!");
-    } else {
-      // Подпись и отправка транзакции на десктопе
-      const { signature } = await window.solana.signAndSendTransaction(
-        transaction
-      );
-      console.log("Transaction signature:", signature);
-
-      // Отправка запроса на backend для подтверждения
-      await fetch("/confirm-transaction", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionSignature: signature }),
-      });
-
-      alert("Payment successful!");
-    }
+    alert("Payment successful!");
   } catch (err) {
     console.error("Error processing payment:", err);
   }
