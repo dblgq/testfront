@@ -19,8 +19,8 @@ connectButton.addEventListener("click", async () => {
     const redirectUri = encodeURIComponent(
       "https://dblgq.github.io/testfront/"
     ); // Ваш redirect URI
-    const deepLinkPath = "/?phantom=true"; // Указываем путь, куда вернется пользователь
-    const deeplink = `https://phantom.app/ul/v1?app=${appName}&deep_link_path=${deepLinkPath}&redirect_uri=${redirectUri}`;
+    const deepLinkPath = "/index.html"; // Указываем путь, куда вернется пользователь после авторизации
+    const deeplink = `https://phantom.app/ul/v1/connect?app=${appName}&deep_link_path=${deepLinkPath}&redirect_uri=${redirectUri}`;
 
     console.log("Redirecting to Phantom via deeplink:", deeplink);
     window.location.href = deeplink; // Перенаправление на deeplink Phantom Wallet
