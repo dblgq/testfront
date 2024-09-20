@@ -18,7 +18,7 @@ connectButton.addEventListener("click", async () => {
     const redirectUri = encodeURIComponent(
       "https://dblgq.github.io/testfront/"
     ); // Ваш redirect URI
-    const cluster = "mainnet-beta"; // Опционально: mainnet-beta, testnet или devnet
+    const cluster = "devnet";
     const deeplink = `https://phantom.app/ul/v1/connect?redirect_link=${redirectUri}&cluster=${cluster}`;
 
     console.log("Redirecting to Phantom via deeplink:", deeplink);
